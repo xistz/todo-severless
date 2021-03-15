@@ -1,5 +1,4 @@
-service:
-  name: serverless-todo-app
+service: serverless-todo-app
 
 plugins:
   - serverless-webpack
@@ -8,12 +7,13 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  profile: cloud-developer-serverless
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
 
 functions:
-
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
@@ -22,41 +22,49 @@ functions:
     handler: src/lambda/http/getTodos.handler
     events:
       - http:
+          authorizer: Auth
           method: get
           path: todos
+          cors: true
 
-  # TODO: Configure this function
-  GetTodos:
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
     events:
       - http:
+          authorizer: Auth
           method: post
           path: todos
+          cors: true
 
   # TODO: Configure this function
   UpdateTodo:
     handler: src/lambda/http/updateTodo.handler
     events:
       - http:
+          authorizer: Auth
           method: patch
           path: todos/{todoId}
+          cors: true
 
   # TODO: Configure this function
   DeleteTodo:
     handler: src/lambda/http/deleteTodo.handler
     events:
       - http:
+          authorizer: Auth
           method: delete
           path: todos/{todoId}
+          cors: true
 
   # TODO: Configure this function
   GenerateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
     events:
       - http:
+          authorizer: Auth
           method: post
           path: todos/{todoId}/attachment
+          cors: true
 
 resources:
   Resources:
