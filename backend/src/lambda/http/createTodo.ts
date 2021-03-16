@@ -1,10 +1,8 @@
 import 'source-map-support/register'
 
-import {
-  APIGatewayProxyEvent,
-  APIGatewayProxyHandler,
-  APIGatewayProxyResult
-} from 'aws-lambda'
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import * as middy from 'middy'
+import cors from '@middy/http-cors'
 
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
 
@@ -16,35 +14,38 @@ import { getUserId } from '../utils'
 const docClient = new DocumentClient()
 const todosTable = process.env.TODOS_TABLE
 
-export const handler: APIGatewayProxyHandler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-  const parsedBody: CreateTodoRequest = JSON.parse(event.body)
+export const handler = middy(
+  async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    const parsedBody: CreateTodoRequest = JSON.parse(event.body)
 
-  // TODO: Implement creating a new TODO item
-  const todoId: string = uuidv4()
+    // TODO: Implement creating a new TODO item
+    const todoId: string = uuidv4()
 
-  const newTodo: TodoItem = {
-    todoId,
-    userId: getUserId(event),
-    createdAt: new Date().toISOString(),
-    ...parsedBody,
-    done: false,
-    attachmentUrl: ''
+    const newTodo: TodoItem = {
+      todoId,
+      userId: getUserId(event),
+      createdAt: new Date().toISOString(),
+      ...parsedBody,
+      done: false,
+      attachmentUrl: ''
+    }
+
+    await docClient
+      .put({
+        TableName: todosTable,
+        Item: newTodo
+      })
+      .promise()
+
+    return {
+      statusCode: 201,
+      body: JSON.stringify(newTodo)
+    }
   }
+)
 
-  await docClient
-    .put({
-      TableName: todosTable,
-      Item: newTodo
-    })
-    .promise()
-
-  return {
-    statusCode: 201,
-    headers: {
-      'Access-Control-Allow-Origin': '*'
-    },
-    body: JSON.stringify(newTodo)
-  }
-}
+handler.use(
+  cors({
+    credentials: true
+  })
+)
