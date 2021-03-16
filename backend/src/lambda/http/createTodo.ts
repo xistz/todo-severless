@@ -22,10 +22,10 @@ export const handler: APIGatewayProxyHandler = async (
   const parsedBody: CreateTodoRequest = JSON.parse(event.body)
 
   // TODO: Implement creating a new TODO item
-  const id: string = uuidv4()
+  const todoId: string = uuidv4()
 
   const newTodo: TodoItem = {
-    id,
+    todoId,
     userId: getUserId(event),
     createdAt: new Date().toISOString(),
     ...parsedBody,

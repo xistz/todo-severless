@@ -20,7 +20,7 @@ export const handler: APIGatewayProxyHandler = async (
     .delete({
       TableName: todosTable,
       Key: {
-        id: todoId
+        todoId
       }
     })
     .promise()
