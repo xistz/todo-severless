@@ -22,14 +22,17 @@ export const handler = middy(
     const userId = getUserId(event)
 
     // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
-    const result = await docClient
+    await docClient
       .update({
         TableName: todosTable,
         Key: {
           todoId,
           userId
         },
-        UpdateExpression: 'set name = :name, dueDate = :dueDate, done = :done',
+        UpdateExpression: 'set #name = :name, dueDate = :dueDate, done = :done',
+        ExpressionAttributeNames: {
+          '#name': 'name'
+        },
         ExpressionAttributeValues: {
           ':name': updatedTodo.name,
           ':dueDate': updatedTodo.dueDate,
@@ -39,11 +42,9 @@ export const handler = middy(
       })
       .promise()
 
-    const item = result.Attributes
-
     return {
       statusCode: 200,
-      body: JSON.stringify(item)
+      body: JSON.stringify({})
     }
   }
 )
