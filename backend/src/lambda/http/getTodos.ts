@@ -15,8 +15,12 @@ export const handler = middy(
     const userId = getUserId(event)
 
     const result = await docClient
-      .scan({
-        TableName: todosTable
+      .query({
+        TableName: todosTable,
+        KeyConditionExpression: 'UserId = :userId',
+        ExpressionAttributeValues: {
+          ':userId': userId
+        }
       })
       .promise()
 
@@ -29,8 +33,4 @@ export const handler = middy(
   }
 )
 
-handler.use(
-  cors({
-    credentials: true
-  })
-)
+handler.use(cors({ credentials: true }))

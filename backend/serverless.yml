@@ -32,7 +32,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:Scan
+          - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
   CreateTodo:
@@ -92,3 +92,14 @@ functions:
 resources:
   Resources:
     # TODO: Add any necessary AWS resources
+    TodosDynamoDBTable:
+      Types: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: todoId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: todoId
+            KeyType: hash
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.TODOS_TABLE}
