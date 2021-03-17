@@ -20,10 +20,11 @@ export const handler = middy(
 
     // TODO: Implement creating a new TODO item
     const todoId: string = uuidv4()
+    const userId = getUserId(event)
 
     const newTodo: TodoItem = {
       todoId,
-      userId: getUserId(event),
+      userId,
       createdAt: new Date().toISOString(),
       ...parsedBody,
       done: false,
@@ -44,8 +45,4 @@ export const handler = middy(
   }
 )
 
-handler.use(
-  cors({
-    credentials: true
-  })
-)
+handler.use(cors({ credentials: true }))
