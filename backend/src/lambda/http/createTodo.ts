@@ -13,6 +13,7 @@ import { getUserId } from '../utils'
 
 const docClient = new DocumentClient()
 const todosTable = process.env.TODOS_TABLE
+const bucketName = process.env.IMAGES_S3_BUCKET
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -28,7 +29,7 @@ export const handler = middy(
       createdAt: new Date().toISOString(),
       ...parsedBody,
       done: false,
-      attachmentUrl: ''
+      attachmentUrl: `https://${bucketName}.s3.amazonaws.com/${todoId}`
     }
 
     await docClient
