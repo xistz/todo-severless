@@ -101,7 +101,7 @@ resources:
   Resources:
     # TODO: Add any necessary AWS resources
     TodosDynamoDBTable:
-      Types: AWS::DynamoDB::Table
+      Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
           - AttributeName: todoId
