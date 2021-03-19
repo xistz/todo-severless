@@ -27,7 +27,7 @@ export const handler = async (
   logger.info('Authorizing a user', event.authorizationToken)
   try {
     const jwtToken = await verifyToken(event.authorizationToken)
-    logger.info('User was authorized', jwtToken)
+    logger.info('User was authorized')
 
     return {
       principalId: jwtToken.sub,
@@ -76,9 +76,9 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
   const getSigningKey = promisify(client.getSigningKey)
   const key = await getSigningKey(jwt.header.kid)
   const signingKey = key.getPublicKey()
-  const verifiedToken = verify(token, signingKey, verifyOptions) as Jwt
+  const verifiedToken = verify(token, signingKey, verifyOptions) as JwtPayload
 
-  return verifiedToken.payload
+  return verifiedToken
 }
 
 function getToken(authHeader: string): string {
