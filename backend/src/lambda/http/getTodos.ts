@@ -21,11 +21,11 @@ export const handler = middy(
     // TODO: Get all TODO items for a current user
     const userId = getUserId(event)
 
-    const items = await getTodos(userId)
+    const todos = await getTodos(userId)
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ items })
+      body: JSON.stringify({ items: todos })
     }
   }
 )
