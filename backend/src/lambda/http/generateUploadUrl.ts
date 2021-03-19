@@ -5,6 +5,9 @@ import * as middy from 'middy'
 import cors from '@middy/http-cors'
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
+import { createLogger } from '../../utils/logger'
+
+const logger = createLogger('generateUploadUrl')
 
 const XAWS = AWSXRay.captureAWS(AWS)
 const s3 = new XAWS.S3({
@@ -20,6 +23,8 @@ export const handler = middy(
 
     // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
     const presignedUrl = generatePresignedUrl(todoId)
+
+    logger.info('generated presigned url')
 
     return {
       statusCode: 200,

@@ -8,6 +8,9 @@ import cors from '@middy/http-cors'
 import { getUserId } from '../utils'
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
+import { createLogger } from '../../utils/logger'
+
+const logger = createLogger('createTodo')
 
 const XAWS = AWSXRay.captureAWS(AWS)
 const docClient = new XAWS.DynamoDB.DocumentClient()
@@ -55,4 +58,6 @@ const updateTodo = async (
       ReturnValues: 'ALL_NEW'
     })
     .promise()
+
+  logger.info('updated todo')
 }

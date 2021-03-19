@@ -6,6 +6,9 @@ import cors from '@middy/http-cors'
 import { getUserId } from '../utils'
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
+import { createLogger } from '../../utils/logger'
+
+const logger = createLogger('deleteTodo')
 
 const XAWS = AWSXRay.captureAWS(AWS)
 const docClient = new XAWS.DynamoDB.DocumentClient()
@@ -39,5 +42,5 @@ const deleteTodo = async (todoId: string, userId: string) => {
     })
     .promise()
 
-  console.log(`deleted todo todoId: ${todoId}, userId: ${userId}`)
+  logger.info(`deleted todo todoId: ${todoId}, userId: ${userId}`)
 }

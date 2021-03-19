@@ -5,12 +5,14 @@ import * as middy from 'middy'
 import cors from '@middy/http-cors'
 
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
-
+import { createLogger } from '../../utils/logger'
 import { v4 as uuidv4 } from 'uuid'
 import { TodoItem } from '../../models/TodoItem'
 import { getUserId } from '../utils'
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
+
+const logger = createLogger('createTodo')
 
 const XAWS = AWSXRay.captureAWS(AWS)
 const docClient = new XAWS.DynamoDB.DocumentClient()
@@ -53,7 +55,7 @@ const createTodo = async (name: string, dueDate: string, userId: string) => {
     })
     .promise()
 
-  console.log('created new todo', newTodo)
+  logger.info('created new todo', newTodo)
 
   return newTodo
 }
