@@ -1,12 +1,14 @@
 import 'source-map-support/register'
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import * as middy from 'middy'
 import cors from '@middy/http-cors'
 import { getUserId } from '../utils'
+import * as AWS from 'aws-sdk'
+import * as AWSXRay from 'aws-xray-sdk'
 
-const docClient = new DocumentClient()
+const XAWS = AWSXRay.captureAWS(AWS)
+const docClient = new XAWS.DynamoDB.DocumentClient()
 const todosTable = process.env.TODOS_TABLE
 
 export const handler = middy(
@@ -15,15 +17,7 @@ export const handler = middy(
     const userId = getUserId(event)
 
     // TODO: Remove a TODO item by id
-    await docClient
-      .delete({
-        TableName: todosTable,
-        Key: {
-          todoId,
-          userId
-        }
-      })
-      .promise()
+    await deleteTodo(todoId, userId)
 
     return {
       statusCode: 200,
@@ -33,3 +27,17 @@ export const handler = middy(
 )
 
 handler.use(cors({ credentials: true }))
+
+const deleteTodo = async (todoId: string, userId: string) => {
+  await docClient
+    .delete({
+      TableName: todosTable,
+      Key: {
+        todoId,
+        userId
+      }
+    })
+    .promise()
+
+  console.log(`deleted todo todoId: ${todoId}, userId: ${userId}`)
+}
