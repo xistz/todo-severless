@@ -3,12 +3,14 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
-import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import * as middy from 'middy'
 import cors from '@middy/http-cors'
 import { getUserId } from '../utils'
+import * as AWS from 'aws-sdk'
+import * as AWSXRay from 'aws-xray-sdk'
 
-const docClient = new DocumentClient()
+const XAWS = AWSXRay.captureAWS(AWS)
+const docClient = new XAWS.DynamoDB.DocumentClient()
 const todosTable = process.env.TODOS_TABLE
 
 export const handler = middy(
@@ -18,25 +20,7 @@ export const handler = middy(
     const userId = getUserId(event)
 
     // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
-    await docClient
-      .update({
-        TableName: todosTable,
-        Key: {
-          todoId,
-          userId
-        },
-        UpdateExpression: 'set #name = :name, dueDate = :dueDate, done = :done',
-        ExpressionAttributeNames: {
-          '#name': 'name'
-        },
-        ExpressionAttributeValues: {
-          ':name': updatedTodo.name,
-          ':dueDate': updatedTodo.dueDate,
-          ':done': updatedTodo.done
-        },
-        ReturnValues: 'ALL_NEW'
-      })
-      .promise()
+    await updateTodo(todoId, userId, updatedTodo)
 
     return {
       statusCode: 200,
@@ -46,3 +30,29 @@ export const handler = middy(
 )
 
 handler.use(cors({ credentials: true }))
+
+const updateTodo = async (
+  todoId: string,
+  userId: string,
+  updatedTodo: UpdateTodoRequest
+) => {
+  await docClient
+    .update({
+      TableName: todosTable,
+      Key: {
+        todoId,
+        userId
+      },
+      UpdateExpression: 'set #name = :name, dueDate = :dueDate, done = :done',
+      ExpressionAttributeNames: {
+        '#name': 'name'
+      },
+      ExpressionAttributeValues: {
+        ':name': updatedTodo.name,
+        ':dueDate': updatedTodo.dueDate,
+        ':done': updatedTodo.done
+      },
+      ReturnValues: 'ALL_NEW'
+    })
+    .promise()
+}
