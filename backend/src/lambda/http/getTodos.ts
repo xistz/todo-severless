@@ -13,6 +13,7 @@ const logger = createLogger('createTodo')
 const XAWS = AWSXRay.captureAWS(AWS)
 const docClient = new XAWS.DynamoDB.DocumentClient()
 const todosTable = process.env.TODOS_TABLE
+const todosUserIndex = process.env.TODOS_USER_INDEX
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -34,7 +35,8 @@ const getTodos = async (userId: string) => {
   const result = await docClient
     .query({
       TableName: todosTable,
-      KeyConditionExpression: 'UserId = :userId',
+      IndexName: todosUserIndex,
+      KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
         ':userId': userId
       }
@@ -42,6 +44,7 @@ const getTodos = async (userId: string) => {
     .promise()
 
   logger.info('got todos')
+  logger.info(`typeof todos ${typeof result.Items}`)
 
   return result.Items
 }
