@@ -7,8 +7,9 @@ import { getUserId } from '../utils'
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
 import { createLogger } from '../../utils/logger'
+import { TodoItem } from '../../models/TodoItem'
 
-const logger = createLogger('createTodo')
+const logger = createLogger('getTodos')
 
 const XAWS = AWSXRay.captureAWS(AWS)
 const docClient = new XAWS.DynamoDB.DocumentClient()
@@ -20,11 +21,11 @@ export const handler = middy(
     // TODO: Get all TODO items for a current user
     const userId = getUserId(event)
 
-    const todos = getTodos(userId)
+    const items = await getTodos(userId)
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ todos })
+      body: JSON.stringify({ items })
     }
   }
 )
@@ -44,7 +45,6 @@ const getTodos = async (userId: string) => {
     .promise()
 
   logger.info('got todos')
-  logger.info(`typeof todos ${typeof result.Items}`)
 
-  return result.Items
+  return result.Items as TodoItem[]
 }
