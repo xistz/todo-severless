@@ -11,12 +11,16 @@ provider:
   profile: cloud-developer-serverless
 
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
+  region: ${opt:region, 'ap-northeast-1'}
 
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     IMAGES_S3_BUCKET: todo-serverless-images-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
+
+  tracing:
+    lambda: true
+    apiGateway: true
 
 functions:
   Auth:
