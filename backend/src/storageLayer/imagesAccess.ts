@@ -13,7 +13,7 @@ export class ImageAccess {
     private readonly urlExpiration = process.env.SIGNED_URL_EXPIRATION
   ) {}
 
-  async generatePresignedUrl(todoId: string): Promise<string> {
+  generatePresignedUrl(todoId: string): string {
     this.logger('generatePresignedUrl').info('Generating presigned URL')
 
     return this.s3.getSignedUrl('putObject', {
