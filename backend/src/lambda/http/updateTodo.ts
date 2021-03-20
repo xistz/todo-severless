@@ -6,15 +6,7 @@ import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 import * as middy from 'middy'
 import cors from '@middy/http-cors'
 import { getUserId } from '../utils'
-import * as AWS from 'aws-sdk'
-import * as AWSXRay from 'aws-xray-sdk'
-import { createLogger } from '../../utils/logger'
-
-const logger = createLogger('updateTodo')
-
-const XAWS = AWSXRay.captureAWS(AWS)
-const docClient = new XAWS.DynamoDB.DocumentClient()
-const todosTable = process.env.TODOS_TABLE
+import { updateTodo } from '../../businessLogic/todos'
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -33,31 +25,3 @@ export const handler = middy(
 )
 
 handler.use(cors({ credentials: true }))
-
-const updateTodo = async (
-  todoId: string,
-  userId: string,
-  updatedTodo: UpdateTodoRequest
-) => {
-  await docClient
-    .update({
-      TableName: todosTable,
-      Key: {
-        todoId,
-        userId
-      },
-      UpdateExpression: 'set #name = :name, dueDate = :dueDate, done = :done',
-      ExpressionAttributeNames: {
-        '#name': 'name'
-      },
-      ExpressionAttributeValues: {
-        ':name': updatedTodo.name,
-        ':dueDate': updatedTodo.dueDate,
-        ':done': updatedTodo.done
-      },
-      ReturnValues: 'ALL_NEW'
-    })
-    .promise()
-
-  logger.info('updated todo')
-}
